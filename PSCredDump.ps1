@@ -5,11 +5,10 @@ if(-not($dump)){
     Write-Host "ERROR. The Powershell Dump was not defined"
     Exit
 }
-
 if (-not(Test-Path -Path $dump)) {
     Write-Host "ERROR. The Powershell dump was not found."
     Exit
- }
+}
 if (-not(Get-Module -ListAvailable -Name windbg)) {
     Write-Host "ERROR. Windbg module is not installed, install with install-module windbg"
     Exit
@@ -25,9 +24,9 @@ $HistoryInfoaddr = 0
 $finalCommandStructure = @()
 
 foreach ($line in $allReferences){
-if($line -like "*Microsoft.PowerShell.Commands.HistoryInfo"){
-$HistoryInfoaddr =  $line.Split(" ")[0]
-}
+    if($line -like "*Microsoft.PowerShell.Commands.HistoryInfo"){
+        $HistoryInfoaddr =  $line.Split(" ")[0]
+    }
 }
 $commandListAddresses = dbg !DumpHeap /d -mt $HistoryInfoaddr
 foreach ($line in $commandListAddresses){
@@ -42,12 +41,12 @@ foreach ($line in $commandListAddresses){
                      if(-not($aztokens)){ 
                         $finalCommandStructure += $cleancommand[1]
                      }
-                     if($aztokens -and ($member -like "*eyJ*" -or $member -like "*eyJ*" -or $member -like "*graph*" -or $member -like "*Connect-AzAccount *" -or $member -like "*Get-Az*" -or $member -like "*az*" -or $member -like "" -or $member -like "*pscredential*")){
+                     if($aztokens -and ($member -like "*eyJ*" -or $member -like "*graph*" -or $member -like "*Connect-AzAccount *" -or $member -like "*Get-Az*" -or $member -like "*az*" -or $member -like "*pscredential*" or $member -like "*ConvertTo-SecureString*")){
                         $finalCommandStructure += $cleancommand[1]
                      }
-                        }
-       }
-}
+                }
+            }
+        }
     }
 }
 Disconnect-Dbgsession
